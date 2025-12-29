@@ -1,0 +1,27 @@
+# Source and Tests
+src/
+test/
+tests/
+__tests__/
+examples/
+docs.html
+
+# Editor directories
+.vscode/
+.idea/
+
+# CI/CD
+.github/
+
+# Configuration
+tsconfig.json
+tsconfig.*.json
+.eslintrc*
+.prettierrc*
+jest.config.js
+
+# System and Logs
+.DS_Store
+Thumbs.db
+*.log
+node_modules/

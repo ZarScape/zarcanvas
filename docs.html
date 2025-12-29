@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ZarCanvas - Native canvas library for creating modern, visually clean cards. Optimized for social media simulation and music player visuals.">
+    <meta name="author" content="ZarScape">
+    <meta name="keywords" content="ZarCanvas, canvas, image generation, social media cards, music cards, node-canvas">
+    
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://github.com/ZarScape/zarcanvas">
+    <meta property="og:title" content="ZarCanvas - Documentation">
+    <meta property="og:description" content="A native canvas library for creating modern, visually clean cards. Optimized for social media simulation and music player visuals.">
+    <meta property="og:image" content="https://raw.githubusercontent.com/ZarScape/ZarScape/refs/heads/main/images/zarcanvas/banner-zarcanvas.gif">
+    
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://github.com/ZarScape/zarcanvas">
+    <meta property="twitter:title" content="ZarCanvas - Documentation">
+    <meta property="twitter:description" content="A native canvas library for creating modern, visually clean cards. Optimized for social media simulation and music player visuals.">
+    <meta property="twitter:image" content="https://raw.githubusercontent.com/ZarScape/ZarScape/refs/heads/main/images/zarcanvas/banner-zarcanvas.gif">
+    
+    <title>ZarCanvas - Documentation</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Rubik+Wet+Paint&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Inter', 'sans-serif'], // For the logo
+                    },
+                    colors: {
+                        dark: {
+                            900: '#0f172a', // Main bg
+                            800: '#1e293b', // Cards/Sidebar
+                            700: '#334155', // Borders
+                        },
+                        brand: {
+                            pink: '#ec4899',
+                            purple: '#a855f7',
+                            blue: '#3b82f6'
+                        }
+                    },
+                    backgroundImage: {
+                        'gradient-brand': 'linear-gradient(to right, #ec4899, #a855f7, #3b82f6)',
+                        'gradient-hover': 'linear-gradient(to right, #db2777, #9333ea, #2563eb)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Scrollbar for Dark Theme */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Code Block Copy Button */
+        .code-wrapper { position: relative; }
+        .copy-btn {
+            position: absolute; top: 0.75rem; right: 0.75rem;
+            opacity: 0; background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 0.25rem 0.6rem; border-radius: 0.375rem;
+            color: #e2e8f0; font-size: 0.75rem; cursor: pointer;
+            transition: all 0.2s; backdrop-filter: blur(4px);
+        }
+        .code-wrapper:hover .copy-btn { opacity: 1; }
+        .copy-btn:hover { background: rgba(255,255,255,0.2); }
+
+        /* Gradient Text Helper */
+        .text-gradient {
+            background: linear-gradient(to right, #ec4899, #a855f7, #3b82f6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Global Transition */
+        * {
+            transition: all 0.2s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-dark-900 text-slate-300 antialiased h-screen flex flex-col overflow-hidden selection:bg-brand-purple selection:text-white">
+
+    <div id="search-modal" class="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm hidden flex items-start justify-center pt-24 opacity-0 transition-opacity duration-200">
+        <div class="bg-dark-800 w-full max-w-lg rounded-xl shadow-2xl border border-dark-700 transform scale-95 transition-transform duration-200 flex flex-col overflow-hidden max-h-[60vh]">
+            <div class="border-b border-dark-700 p-4 flex items-center gap-3">
+                <i class="fa-solid fa-magnifying-glass text-slate-400"></i>
+                <input type="text" id="search-input" placeholder="Search documentation..." class="flex-1 bg-transparent outline-none text-white placeholder-slate-500">
+                <kbd class="hidden sm:inline-block border border-dark-700 bg-dark-900 rounded px-1.5 text-xs text-slate-400">ESC</kbd>
+            </div>
+            <div id="search-results" class="overflow-y-auto p-2">
+                <div class="text-center py-8 text-slate-500 text-sm">Type to search...</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="mobile-overlay" class="fixed inset-0 z-40 bg-black/80 backdrop-blur-sm hidden md:hidden transition-opacity" onclick="toggleMobileMenu()"></div>
+
+    <header class="border-b border-dark-700 h-16 flex items-center justify-between px-4 lg:px-6 sticky top-0 bg-dark-900/80 backdrop-blur-md z-30">
+        <div class="flex items-center gap-4 lg:gap-8">
+            <button onclick="toggleMobileMenu()" class="md:hidden text-slate-400 hover:text-white">
+                <i class="fa-solid fa-bars text-xl"></i>
+            </button>
+
+            <a href="#" class="flex items-center gap-2 group">
+                <span class="font-display text-3xl tracking-wide text-gradient filter drop-shadow-lg font-bold">ZarCanvas</span>
+            </a>
+            
+            <nav class="hidden md:flex gap-6 text-sm font-medium text-slate-400">
+                <a href="#examples" class="hover:text-white transition hover:text-gradient">Examples</a>
+                <a href="#api-reference" class="hover:text-white transition hover:text-gradient">API Reference</a>
+                <a href="https://github.com/ZarScape/zarcanvas" target="_blank" class="hover:text-white transition hover:text-gradient">GitHub</a>
+            </nav>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <button onclick="openSearch()" class="group hidden lg:flex items-center gap-2 px-3 py-1.5 border border-dark-700 rounded-md bg-dark-800 text-sm text-slate-400 hover:border-brand-purple hover:text-white transition w-56">
+                <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                <span class="flex-1 text-left">Search...</span>
+                <div class="flex gap-1">
+                    <kbd class="border border-dark-700 bg-dark-900 rounded px-1.5 text-[10px] text-slate-500">Ctrl</kbd>
+                    <kbd class="border border-dark-700 bg-dark-900 rounded px-1.5 text-[10px] text-slate-500">K</kbd>
+                </div>
+            </button>
+            
+            <button onclick="openSearch()" class="lg:hidden text-slate-400 hover:text-white p-2">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+
+            <a href="https://www.npmjs.com/package/zarcanvas" target="_blank" class="hidden sm:flex items-center gap-2 px-4 py-1.5 bg-gradient-brand text-white rounded-md text-sm font-bold shadow-lg shadow-brand-purple/20 hover:shadow-brand-purple/40 hover:opacity-90 transition transform hover:-translate-y-0.5">
+                <i class="fa-brands fa-npm"></i>
+                <span>NPM</span>
+            </a>
+        </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden relative">
+        <aside id="sidebar" class="fixed md:static inset-y-0 left-0 w-72 bg-dark-900 border-r border-dark-700 transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-50 overflow-y-auto no-scrollbar pb-10">
+            <div class="p-6">
+                <div class="flex md:hidden justify-end mb-4">
+                    <button onclick="toggleMobileMenu()" class="text-slate-400"><i class="fa-solid fa-xmark text-xl"></i></button>
+                </div>
+
+                <div class="mb-8">
+                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 px-2">Start Here</h3>
+                    <ul class="space-y-1 text-sm">
+                        <li><a href="#welcome" class="nav-link block px-3 py-2 rounded-md text-slate-400 hover:bg-dark-800 hover:text-white transition">Overview</a></li>
+                        <li><a href="#installation" class="nav-link block px-3 py-2 rounded-md text-slate-400 hover:bg-dark-800 hover:text-white transition">Installation</a></li>
+                    </ul>
+                </div>
+
+                <div class="mb-8">
+                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 px-2">Examples</h3>
+                    <ul class="space-y-1 text-sm">
+                        <li><a href="#music-card" class="nav-link block px-3 py-2 rounded-md text-slate-400 hover:bg-dark-800 hover:text-white transition flex items-center justify-between group">Music Card <i class="fa-solid fa-music text-xs opacity-0 group-hover:opacity-100 text-brand-pink"></i></a></li>
+                        <li><a href="#profile-card" class="nav-link block px-3 py-2 rounded-md text-slate-400 hover:bg-dark-800 hover:text-white transition">Profile Card</a></li>
+                        <li><a href="#instagram-card" class="nav-link block px-3 py-2 rounded-md text-slate-400 hover:bg-dark-800 hover:text-white transition">Instagram Card</a></li>
+                        <li><a href="#tweet-card" class="nav-link block px-3 py-2 rounded-md text-slate-400 hover:bg-dark-800 hover:text-white transition">Tweet Card</a></li>
+                        <li><a href="#ship-card" class="nav-link block px-3 py-2 rounded-md text-slate-400 hover:bg-dark-800 hover:text-white transition">Ship Card</a></li>
+                    </ul>
+                </div>
+
+                <div class="mb-8">
+                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 px-2">API Reference</h3>
+                    <ul class="space-y-1 text-sm">
+                        <li><a href="#api-music" class="nav-link block px-3 py-2 rounded-md text-slate-400 hover:bg-dark-800 hover:text-white transition">MusicCardOptions</a></li>
+                        <li><a href="#api-profile" class="nav-link block px-3 py-2 rounded-md text-slate-400 hover:bg-dark-800 hover:text-white transition">ProfileCardOptions</a></li>
+                        <li><a href="#api-instagram" class="nav-link block px-3 py-2 rounded-md text-slate-400 hover:bg-dark-800 hover:text-white transition">InstagramCardOptions</a></li>
+                        <li><a href="#api-tweet" class="nav-link block px-3 py-2 rounded-md text-slate-400 hover:bg-dark-800 hover:text-white transition">TweetCardOptions</a></li>
+                        <li><a href="#api-ship" class="nav-link block px-3 py-2 rounded-md text-slate-400 hover:bg-dark-800 hover:text-white transition">ShipCardOptions</a></li>
+                    </ul>
+                </div>
+            </div>
+        </aside>
+
+        <main id="main-content" class="flex-1 overflow-y-auto px-6 py-10 lg:px-12 scroll-smooth">
+            <div class="max-w-4xl mx-auto pb-20">
+                
+                <section id="welcome" class="scroll-mt-24 mb-16">
+                    <h1 class="text-4xl lg:text-6xl font-extrabold text-white tracking-tight mb-4">
+                        <span class="text-gradient">ZarCanvas</span>
+                    </h1>
+                    <p class="text-lg text-slate-400 mb-8 leading-relaxed max-w-2xl">
+                        A native canvas library for creating modern, visually clean cards. Optimized for social media simulation and music player visuals.
+                    </p>
+
+                    <div class="mb-10 rounded-xl overflow-hidden bg-dark-800">
+                        <img src="https://raw.githubusercontent.com/ZarScape/ZarScape/refs/heads/main/images/zarcanvas/banner-zarcanvas.gif" alt="ZarCanvas Banner" class="w-full h-auto object-cover">
+                    </div>
+
+                    <div class="flex flex-wrap gap-3 mb-10">
+                        <a href="https://www.npmjs.com/package/zarcanvas" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-3 py-1.5 bg-dark-800 border border-dark-700 rounded-md text-sm text-slate-300 hover:text-white hover:border-brand-purple transition">
+                            <i class="fa-brands fa-npm text-brand-pink"></i>
+                            <span>NPM</span>
+                        </a>
+                        <a href="https://opensource.org/licenses/ISC" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-3 py-1.5 bg-dark-800 border border-dark-700 rounded-md text-sm text-slate-300 hover:text-white hover:border-brand-purple transition">
+                            <i class="fa-solid fa-scroll text-brand-blue"></i>
+                            <span>ISC License</span>
+                        </a>
+                        <a href="https://nodejs.org/" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-3 py-1.5 bg-dark-800 border border-dark-700 rounded-md text-sm text-slate-300 hover:text-white hover:border-brand-purple transition">
+                            <i class="fa-brands fa-node-js text-green-400"></i>
+                            <span>Node.js >=18</span>
+                        </a>
+                        <a href="https://discord.gg/6YVmxA4Qsf" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-3 py-1.5 bg-dark-800 border border-dark-700 rounded-md text-sm text-slate-300 hover:text-white hover:border-brand-purple transition" style="background-color: #5865F2;">
+                            <i class="fa-brands fa-discord"></i>
+                            <span>Discord</span>
+                        </a>
+                        <a href="https://github.com/ZarScape/zarcanvas" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-3 py-1.5 bg-dark-800 border border-dark-700 rounded-md text-sm text-slate-300 hover:text-white hover:border-brand-purple transition" style="background-color: #181717;">
+                            <i class="fa-brands fa-github"></i>
+                            <span>GitHub</span>
+                        </a>
+                    </div>
+                </section>
+
+                <section id="installation" class="scroll-mt-24 mb-16">
+                    <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+                        <i class="fa-solid fa-rocket text-brand-pink"></i> Installation
+                    </h2>
+                    <div class="code-wrapper bg-[#1d1f21] rounded-lg border border-dark-700 overflow-hidden shadow-lg">
+                        <pre class="p-4 m-0 text-brand-pink"><code class="language-bash">npm install zarcanvas</code></pre>
+                    </div>
+                </section>
+
+                <div class="h-px bg-gradient-to-r from-transparent via-dark-700 to-transparent mb-16"></div>
+
+                <section id="examples" class="scroll-mt-24">
+                    <h2 class="text-2xl font-bold text-white mb-10"><i class="fa-solid fa-screwdriver-wrench"></i> Usage Examples</h2>
+
+                    <article id="music-card" class="scroll-mt-24 mb-20">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="bg-dark-800 text-brand-pink border border-dark-700 text-xs font-bold px-2 py-1 rounded">01</span>
+                            <h3 class="text-xl font-bold text-white">Music Card</h3>
+                        </div>
+                        <p class="text-slate-400 mb-6">Perfect for "Now Playing" visuals with gradient support.</p>
+                        
+                        <div class="space-y-8">
+                            <div>
+                                <h4 class="text-sm font-semibold text-slate-300 uppercase tracking-wide mb-3">Full Version (With Progress)</h4>
+                                <div class="bg-dark-800 rounded-lg p-6 mb-4 flex justify-center">
+                                    <img src="https://raw.githubusercontent.com/ZarScape/ZarScape/refs/heads/main/images/zarcanvas/music-card.png" class="rounded" alt="Music Card">
+                                </div>
+                                <div class="code-wrapper bg-[#1d1f21] rounded-lg border border-dark-700 overflow-hidden">
+<pre class="m-0"><code class="language-javascript">import { MusicCard } from 'zarcanvas';
+import fs from 'node:fs';
+
+const card = new MusicCard({
+  trackName: 'MONTAGEM ZAR',
+  artistName: 'ZarScape',
+  albumArt: 'https://raw.githubusercontent.com/ZarScape/ZarScape/refs/heads/main/images/ZarScape/logo-with-background.png',
+  backgroundColor: '#082131ff',
+  gradientColor: '#467ca0ff',
+  progressBar: 75,
+  progressTime: '2:30 / 3:12',
+  trackNameColor: '#bacfddff',
+  artistNameColor: '#abc2d1ff',
+  progressTimeColor: '#9cb4c4ff',
+  progressBarColor: ['#2a4a5aff', '#68b3d8']
+});
+
+const buffer = await card.build();
+fs.writeFileSync('music_full.png', buffer);</code></pre>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 class="text-sm font-semibold text-slate-300 uppercase tracking-wide mb-3">Minimal Version (No Progress)</h4>
+                                <div class="bg-dark-800 rounded-lg p-6 mb-4 flex justify-center">
+                                    <img src="https://raw.githubusercontent.com/ZarScape/ZarScape/refs/heads/main/images/zarcanvas/minimal-music-card.png" class="rounded" alt="Minimal Card">
+                                </div>
+                                <div class="code-wrapper bg-[#1d1f21] rounded-lg border border-dark-700 overflow-hidden">
+<pre class="m-0"><code class="language-javascript">const minimalCard = new MusicCard({
+  trackName: 'MONTAGEM ZAR',
+  artistName: 'ZarScape',
+  albumArt: 'https://raw.githubusercontent.com/ZarScape/ZarScape/refs/heads/main/images/ZarScape/logo-with-background.png',
+  backgroundColor: '#082131ff',
+  gradientColor: '#467ca0ff',
+  trackNameColor: '#bacfddff',
+  artistNameColor: '#abc2d1ff'
+});
+
+const buffer = await minimalCard.build();
+fs.writeFileSync('music_minimal.png', buffer);</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article id="profile-card" class="scroll-mt-24 mb-20">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="bg-dark-800 text-brand-purple border border-dark-700 text-xs font-bold px-2 py-1 rounded">02</span>
+                            <h3 class="text-xl font-bold text-white">Profile Card</h3>
+                        </div>
+                        <p class="text-slate-400 mb-6">Designer profile card with background blur and frame effects.</p>
+                        
+                        <div class="bg-dark-800 rounded-lg p-6 mb-4 flex justify-center">
+                            <img src="https://raw.githubusercontent.com/ZarScape/ZarScape/refs/heads/main/images/zarcanvas/profile-card.png" class="rounded" alt="Profile Card">
+                        </div>
+                        <div class="code-wrapper bg-[#1d1f21] rounded-lg border border-dark-700 overflow-hidden">
+<pre class="m-0"><code class="language-javascript">import { ProfileCard } from 'zarcanvas';
+
+const card = new ProfileCard({
+  avatarURL: 'https://raw.githubusercontent.com/ZarScape/ZarScape/refs/heads/main/images/ZarScape/logo-with-background.png',
+  decorationURL: 'https://cdn.discordapp.com/avatar-decoration-presets/a_64c339e0c128dcb279ae201b1190d9d3.png',
+  backgroundURL: 'https://raw.githubusercontent.com/ZarScape/ZarScape/refs/heads/main/images/ZarScape/banner-with-text.png',
+  userName: 'zarscape',
+  userDisplayname: 'ZarScape',
+  backgroundBlur: 20,
+  usernameColor: '#b8e7ff',
+  borderColor: ['#60a5c7', '#193542ff']
+});
+
+const buffer = await card.build();</code></pre>
+                        </div>
+                    </article>
+
+                    <article id="instagram-card" class="scroll-mt-24 mb-20">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="bg-dark-800 text-brand-blue border border-dark-700 text-xs font-bold px-2 py-1 rounded">03</span>
+                            <h3 class="text-xl font-bold text-white">Instagram Card</h3>
+                        </div>
+                        <p class="text-slate-400 mb-6">Authentic Instagram post simulation.</p>
+                        
+                        <div class="grid xl:grid-cols-2 gap-6">
+                            <div class="bg-dark-800 rounded-lg p-6 flex justify-center items-center">
+                                <img src="https://raw.githubusercontent.com/ZarScape/ZarScape/refs/heads/main/images/zarcanvas/instagram-card.png" class="rounded max-h-96" alt="Instagram Card">
+                            </div>
+                            <div class="code-wrapper bg-[#1d1f21] rounded-lg border border-dark-700 overflow-hidden h-full">
+<pre class="m-0 h-full"><code class="language-javascript">import { InstagramCard } from 'zarcanvas';
+
+const card = new InstagramCard({
+  username: "ZarScape",
+  avatar: "https://raw.githubusercontent.com/ZarScape/ZarScape/refs/heads/main/images/ZarScape/logo-with-background.png",
+  postImage: "https://raw.githubusercontent.com/ZarScape/ZarScape/refs/heads/main/images/ZarScape/logo-with-background.png",
+  likeCount: 125000,
+  verified: true,
+  postDate: new Date(Date.now() - 86400000)
+});
+
+const buffer = await card.generate();</code></pre>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article id="tweet-card" class="scroll-mt-24 mb-20">
+                         <div class="flex items-center gap-3 mb-4">
+                            <span class="bg-dark-800 text-white border border-dark-700 text-xs font-bold px-2 py-1 rounded">04</span>
+                            <h3 class="text-xl font-bold text-white">Tweet (X) Card</h3>
+                        </div>
+                        <p class="text-slate-400 mb-6">Native X/Twitter post simulation using Chirp fonts.</p>
+                        
+                        <div class="bg-dark-800 rounded-lg p-6 mb-4 flex justify-center">
+                            <img src="https://raw.githubusercontent.com/ZarScape/ZarScape/refs/heads/main/images/zarcanvas/tweet-card.png" class="rounded" alt="Tweet Card">
+                        </div>
+                        <div class="code-wrapper bg-[#1d1f21] rounded-lg border border-dark-700 overflow-hidden">
+<pre class="m-0"><code class="language-javascript">import { TweetCard } from 'zarcanvas';
+
+const card = new TweetCard({
+  user: { 
+    displayName: 'Muhammad Abuzar', 
+    username: 'zarscape' 
+  },
+  message: 'Testing X (tweet) card using ZarCanvas. Looks awesome! #ZarCanvas #Design #ZarScape',
+  verified: true,
+  stats: {
+    replies: 124,
+    retweets: 850,
+    likes: '12K',
+    views: '250K'
+  }
+});
+
+const buffer = await card.build();</code></pre>
+                        </div>
+                    </article>
+
+                    <article id="ship-card" class="scroll-mt-24 mb-20">
+                         <div class="flex items-center gap-3 mb-4">
+                            <span class="bg-dark-800 text-brand-pink border border-dark-700 text-xs font-bold px-2 py-1 rounded">05</span>
+                            <h3 class="text-xl font-bold text-white">Ship Card</h3>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-6 mb-4 flex justify-center">
+                            <img src="https://raw.githubusercontent.com/ZarScape/ZarScape/refs/heads/main/images/zarcanvas/ship-card.png" class="rounded" alt="Ship Card">
+                        </div>
+                        <div class="code-wrapper bg-[#1d1f21] rounded-lg border border-dark-700 overflow-hidden">
+<pre class="m-0"><code class="language-javascript">import { ShipCard } from 'zarcanvas';
+
+const card = new ShipCard()
+  .setAvatar1('https://raw.githubusercontent.com/ZarScape/ZarScape/refs/heads/main/images/ZarScape/logo-with-background.png')
+  .setAvatar2('https://raw.githubusercontent.com/ZarScape/ZarScape/refs/heads/main/images/ZarScape/logo-with-background.png')
+  .setPercentage(95);
+
+const buffer = await card.build();</code></pre>
+                        </div>
+                    </article>
+                </section>
+
+                <div class="h-px bg-gradient-to-r from-transparent via-dark-700 to-transparent mb-16"></div>
+
+                <section id="api-reference" class="scroll-mt-24 mb-20">
+                    <h2 class="text-2xl font-bold text-white mb-8"><i class="fa-solid fa-box-archive"></i> API Reference</h2>
+
+                    <div id="api-music" class="scroll-mt-24 mb-12">
+                        <h3 class="text-lg font-bold text-brand-pink mb-4">MusicCardOptions</h3>
+                        <div class="border border-dark-700 rounded-lg overflow-hidden">
+                            <table class="w-full text-left text-sm text-slate-400">
+                                <thead class="bg-dark-800 text-white font-semibold">
+                                    <tr>
+                                        <th class="px-6 py-4">Property</th>
+                                        <th class="px-6 py-4">Type</th>
+                                        <th class="px-6 py-4 text-center">Req</th>
+                                        <th class="px-6 py-4">Description</th>
+                                        <th class="px-6 py-4">Default</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-dark-700 bg-dark-900/50">
+                                    <tr class="hover:bg-dark-800/50 transition"><td class="px-6 py-4 font-mono text-brand-blue">trackName</td><td class="px-6 py-4 text-xs">string</td><td class="px-6 py-4 text-center text-green-400"><i class="fa-solid fa-check"></i></td><td class="px-6 py-4">Title of the track.</td><td class="px-6 py-4 font-mono text-slate-500">-</td></tr>
+                                    <tr class="hover:bg-dark-800/50 transition"><td class="px-6 py-4 font-mono text-brand-blue">artistName</td><td class="px-6 py-4 text-xs">string</td><td class="px-6 py-4 text-center text-green-400"><i class="fa-solid fa-check"></i></td><td class="px-6 py-4">Name of the artist.</td><td class="px-6 py-4 font-mono text-slate-500">-</td></tr>
+                                    <tr class="hover:bg-dark-800/50 transition"><td class="px-6 py-4 font-mono text-brand-blue">albumArt</td><td class="px-6 py-4 text-xs">string</td><td class="px-6 py-4 text-center text-green-400"><i class="fa-solid fa-check"></i></td><td class="px-6 py-4">URL or path to artwork.</td><td class="px-6 py-4 font-mono text-slate-500">-</td></tr>
+                                    <tr class="hover:bg-dark-800/50 transition"><td class="px-6 py-4 font-mono text-brand-blue">backgroundColor</td><td class="px-6 py-4 text-xs">string</td><td class="px-6 py-4 text-center text-green-400"><i class="fa-solid fa-check"></i></td><td class="px-6 py-4">Background hex/CSS color.</td><td class="px-6 py-4 font-mono text-slate-500">-</td></tr>
+                                    <tr class="hover:bg-dark-800/50 transition"><td class="px-6 py-4 font-mono text-brand-blue">gradientColor</td><td class="px-6 py-4 text-xs">string</td><td class="px-6 py-4 text-center text-green-400"><i class="fa-solid fa-check"></i></td><td class="px-6 py-4">Color for decorative glow.</td><td class="px-6 py-4 font-mono text-slate-500">-</td></tr>
+                                    <tr class="hover:bg-dark-800/50 transition"><td class="px-6 py-4 font-mono text-brand-purple">trackNameColor</td><td class="px-6 py-4 text-xs">string</td><td class="px-6 py-4 text-center text-slate-600"><i class="fa-solid fa-times"></i></td><td class="px-6 py-4">Track title hex color.</td><td class="px-6 py-4 font-mono text-slate-500">#000000</td></tr>
+                                    <tr class="hover:bg-dark-800/50 transition"><td class="px-6 py-4 font-mono text-brand-purple">artistNameColor</td><td class="px-6 py-4 text-xs">string</td><td class="px-6 py-4 text-center text-slate-600"><i class="fa-solid fa-times"></i></td><td class="px-6 py-4">Artist name hex color.</td><td class="px-6 py-4 font-mono text-slate-500">#555555</td></tr>
+                                    <tr class="hover:bg-dark-800/50 transition"><td class="px-6 py-4 font-mono text-brand-purple">progressBar</td><td class="px-6 py-4 text-xs">number</td><td class="px-6 py-4 text-center text-slate-600"><i class="fa-solid fa-times"></i></td><td class="px-6 py-4">Percentage (0-100).</td><td class="px-6 py-4 font-mono text-slate-500">undefined</td></tr>
+                                    <tr class="hover:bg-dark-800/50 transition"><td class="px-6 py-4 font-mono text-brand-purple">progressBarColor</td><td class="px-6 py-4 text-xs">string | string[]</td><td class="px-6 py-4 text-center text-slate-600"><i class="fa-solid fa-times"></i></td><td class="px-6 py-4">Solid or gradient color.</td><td class="px-6 py-4 font-mono text-slate-500">#000000</td></tr>
+                                    <tr class="hover:bg-dark-800/50 transition"><td class="px-6 py-4 font-mono text-brand-purple">progressTime</td><td class="px-6 py-4 text-xs">string</td><td class="px-6 py-4 text-center text-slate-600"><i class="fa-solid fa-times"></i></td><td class="px-6 py-4">Time text (e.g. "2:30 / 4:00").</td><td class="px-6 py-4 font-mono text-slate-500">undefined</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="api-profile" class="scroll-mt-24 mb-12">
+                        <h3 class="text-lg font-bold text-brand-purple mb-4">ProfileCardOptions</h3>
+                        <div class="border border-dark-700 rounded-lg overflow-hidden">
+                            <table class="w-full text-left text-sm text-slate-400">
+                                <thead class="bg-dark-800 text-white font-semibold">
+                                    <tr>
+                                        <th class="px-6 py-4">Property</th>
+                                        <th class="px-6 py-4">Type</th>
+                                        <th class="px-6 py-4 text-center">Req</th>
+                                        <th class="px-6 py-4">Description</th>
+                                        <th class="px-6 py-4">Default</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-dark-700 bg-dark-900/50">
+                                    <tr class="hover:bg-dark-800/50 transition"><td class="px-6 py-4 font-mono text-brand-blue">avatarURL</td><td class="px-6 py-4 text-xs">string</td><td class="px-6 py-4 text-center text-green-400"><i class="fa-solid fa-check"></i></td><td class="px-6 py-4">Main profile avatar URL.</td><td class="px-6 py-4 font-mono text-slate-500">-</td></tr>
+                                    <tr class="hover:bg-dark-800/50 transition"><td class="px-6 py-4 font-mono text-brand-blue">userName</td><td class="px-6 py-4 text-xs">string</td><td class="px-6 py-4 text-center text-green-400"><i class="fa-solid fa-check"></i></td><td class="px-6 py-4">The handle/username (with @).</td><td class="px-6 py-4 font-mono text-slate-500">-</td></tr>
+                                    <tr class="hover:bg-dark-800/50 transition"><td class="px-6 py-4 font-mono text-brand-purple">userDisplayname</td><td class="px-6 py-4 text-xs">string</td><td class="px-6 py-4 text-center text-slate-600"><i class="fa-solid fa-times"></i></td><td class="px-6 py-4">Large display title.</td><td class="px-6 py-4 font-mono text-slate-500">userName</td></tr>
+                                    <tr class="hover:bg-dark-800/50 transition"><td class="px-6 py-4 font-mono text-brand-purple">backgroundBlur</td><td class="px-6 py-4 text-xs">number</td><td class="px-6 py-4 text-center text-slate-600"><i class="fa-solid fa-times"></i></td><td class="px-6 py-4">Blur intensity (0-100).</td><td class="px-6 py-4 font-mono text-slate-500">20</td></tr>
+                                    <tr class="hover:bg-dark-800/50 transition"><td class="px-6 py-4 font-mono text-brand-purple">usernameColor</td><td class="px-6 py-4 text-xs">string</td><td class="px-6 py-4 text-center text-slate-600"><i class="fa-solid fa-times"></i></td><td class="px-6 py-4">Hex color for the title.</td><td class="px-6 py-4 font-mono text-slate-500">#b8e7ff</td></tr>
+                                    <tr class="hover:bg-dark-800/50 transition"><td class="px-6 py-4 font-mono text-brand-purple">borderColor</td><td class="px-6 py-4 text-xs">string | string[]</td><td class="px-6 py-4 text-center text-slate-600"><i class="fa-solid fa-times"></i></td><td class="px-6 py-4">Solid or gradient border.</td><td class="px-6 py-4 font-mono text-slate-500">undefined</td></tr>
+                                    <tr class="hover:bg-dark-800/50 transition"><td class="px-6 py-4 font-mono text-brand-purple">squareAvatar</td><td class="px-6 py-4 text-xs">boolean</td><td class="px-6 py-4 text-center text-slate-600"><i class="fa-solid fa-times"></i></td><td class="px-6 py-4">Use square instead of circle avatar.</td><td class="px-6 py-4 font-mono text-slate-500">false</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div id="api-instagram" class="scroll-mt-24 mb-12">
+                        <h3 class="text-lg font-bold text-brand-blue mb-4">InstagramCardOptions</h3>
+                        <div class="border border-dark-700 rounded-lg overflow-hidden">
+                            <table class="w-full text-left text-sm text-slate-400">
+                                <thead class="bg-dark-800 text-white font-semibold">
+                                    <tr>
+                                        <th class="px-6 py-4">Property</th>
+                                        <th class="px-6 py-4">Type</th>
+                                        <th class="px-6 py-4 text-center">Req</th>
+                                        <th class="px-6 py-4">Description</th>
+                                        <th class="px-6 py-4">Default</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-dark-700 bg-dark-900/50">
+                                    <tr class="hover:bg-dark-800/50 transition"><td class="px-6 py-4 font-mono text-brand-blue">username</td><td class="px-6 py-4 text-xs">string</td><td class="px-6 py-4 text-center text-green-400"><i class="fa-solid fa-check"></i></td><td class="px-6 py-4">Instagram handle.</td><td class="px-6 py-4 font-mono text-slate-500">-</td></tr>
+                                    <tr class="hover:bg-dark-800/50 transition"><td class="px-6 py-4 font-mono text-brand-blue">avatar</td><td class="px-6 py-4 text-xs">string</td><td class="px-6 py-4 text-center text-green-400"><i class="fa-solid fa-check"></i></td><td class="px-6 py-4">Profile image URL.</td><td class="px-6 py-4 font-mono text-slate-500">-</td></tr>
+                                    <tr class="hover:bg-dark-800/50 transition"><td class="px-6 py-4 font-mono text-brand-blue">postImage</td><td class="px-6 py-4 text-xs">string</td><td class="px-6 py-4 text-center text-green-400"><i class="fa-solid fa-check"></i></td><td class="px-6 py-4">Main post content image URL.</td><td class="px-6 py-4 font-mono text-slate-500">-</td></tr>
+                                    <tr class="hover:bg-dark-800/50 transition"><td class="px-6 py-4 font-mono text-brand-blue">likeCount</td><td class="px-6 py-4 text-xs">number</td><td class="px-6 py-4 text-center text-green-400"><i class="fa-solid fa-check"></i></td><td class="px-6 py-4">Total number of likes.</td><td class="px-6 py-4 font-mono text-slate-500">-</td></tr>
+                                    <tr class="hover:bg-dark-800/50 transition"><td class="px-6 py-4 font-mono text-brand-purple">verified</td><td class="px-6 py-4 text-xs">boolean</td><td class="px-6 py-4 text-center text-slate-600"><i class="fa-solid fa-times"></i></td><td class="px-6 py-4">Shows blue verified badge.</td><td class="px-6 py-4 font-mono text-slate-500">true</td></tr>
+                                    <tr class="hover:bg-dark-800/50 transition"><td class="px-6 py-4 font-mono text-brand-purple">postDate</td><td class="px-6 py-4 text-xs">Date | number</td><td class="px-6 py-4 text-center text-slate-600"><i class="fa-solid fa-times"></i></td><td class="px-6 py-4">Date of the post.</td><td class="px-6 py-4 font-mono text-slate-500">Date.now()</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="api-tweet" class="scroll-mt-24 mb-12">
+                        <h3 class="text-lg font-bold text-white mb-4">TweetCardOptions</h3>
+                        <div class="border border-dark-700 rounded-lg overflow-hidden">
+                             <table class="w-full text-left text-sm text-slate-400">
+                                <thead class="bg-dark-800 text-white font-semibold">
+                                    <tr>
+                                        <th class="px-6 py-4">Property</th>
+                                        <th class="px-6 py-4">Type</th>
+                                        <th class="px-6 py-4 text-center">Req</th>
+                                        <th class="px-6 py-4">Description</th>
+                                        <th class="px-6 py-4">Default</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-dark-700 bg-dark-900/50">
+                                    <tr class="hover:bg-dark-800/50 transition"><td class="px-6 py-4 font-mono text-brand-blue">user</td><td class="px-6 py-4 text-xs">object</td><td class="px-6 py-4 text-center text-green-400"><i class="fa-solid fa-check"></i></td><td class="px-6 py-4">{ displayName: string, username: string }</td><td class="px-6 py-4 font-mono text-slate-500">-</td></tr>
+                                    <tr class="hover:bg-dark-800/50 transition"><td class="px-6 py-4 font-mono text-brand-blue">message</td><td class="px-6 py-4 text-xs">string</td><td class="px-6 py-4 text-center text-green-400"><i class="fa-solid fa-check"></i></td><td class="px-6 py-4">The tweet content text.</td><td class="px-6 py-4 font-mono text-slate-500">-</td></tr>
+                                    <tr class="hover:bg-dark-800/50 transition"><td class="px-6 py-4 font-mono text-brand-blue">stats</td><td class="px-6 py-4 text-xs">object</td><td class="px-6 py-4 text-center text-green-400"><i class="fa-solid fa-check"></i></td><td class="px-6 py-4">{ replies, retweets, likes, views }</td><td class="px-6 py-4 font-mono text-slate-500">-</td></tr>
+                                    <tr class="hover:bg-dark-800/50 transition"><td class="px-6 py-4 font-mono text-brand-purple">verified</td><td class="px-6 py-4 text-xs">boolean</td><td class="px-6 py-4 text-center text-slate-600"><i class="fa-solid fa-times"></i></td><td class="px-6 py-4">Shows blue checkmark badge.</td><td class="px-6 py-4 font-mono text-slate-500">true</td></tr>
+                                    <tr class="hover:bg-dark-800/50 transition"><td class="px-6 py-4 font-mono text-brand-purple">timestamp</td><td class="px-6 py-4 text-xs">string</td><td class="px-6 py-4 text-center text-slate-600"><i class="fa-solid fa-times"></i></td><td class="px-6 py-4">Relative time (e.g. "1h").</td><td class="px-6 py-4 font-mono text-slate-500">1h</td></tr>
+                                    <tr class="hover:bg-dark-800/50 transition"><td class="px-6 py-4 font-mono text-brand-purple">avatar</td><td class="px-6 py-4 text-xs">string</td><td class="px-6 py-4 text-center text-slate-600"><i class="fa-solid fa-times"></i></td><td class="px-6 py-4">Profile image URL.</td><td class="px-6 py-4 font-mono text-slate-500">ZarScape Logo</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="api-ship" class="scroll-mt-24 mb-12">
+                        <h3 class="text-lg font-bold text-brand-pink mb-4">ShipCardOptions</h3>
+                        <div class="border border-dark-700 rounded-lg overflow-hidden">
+                             <table class="w-full text-left text-sm text-slate-400">
+                                <thead class="bg-dark-800 text-white font-semibold">
+                                    <tr>
+                                        <th class="px-6 py-4">Property</th>
+                                        <th class="px-6 py-4">Type</th>
+                                        <th class="px-6 py-4 text-center">Req</th>
+                                        <th class="px-6 py-4">Description</th>
+                                        <th class="px-6 py-4">Default</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-dark-700 bg-dark-900/50">
+                                    <tr class="hover:bg-dark-800/50 transition"><td class="px-6 py-4 font-mono text-brand-blue">avatar1</td><td class="px-6 py-4 text-xs">string</td><td class="px-6 py-4 text-center text-green-400"><i class="fa-solid fa-check"></i></td><td class="px-6 py-4">First user avatar URL.</td><td class="px-6 py-4 font-mono text-slate-500">-</td></tr>
+                                    <tr class="hover:bg-dark-800/50 transition"><td class="px-6 py-4 font-mono text-brand-blue">avatar2</td><td class="px-6 py-4 text-xs">string</td><td class="px-6 py-4 text-center text-green-400"><i class="fa-solid fa-check"></i></td><td class="px-6 py-4">Second user avatar URL.</td><td class="px-6 py-4 font-mono text-slate-500">-</td></tr>
+                                    <tr class="hover:bg-dark-800/50 transition"><td class="px-6 py-4 font-mono text-brand-blue">percentage</td><td class="px-6 py-4 text-xs">number</td><td class="px-6 py-4 text-center text-green-400"><i class="fa-solid fa-check"></i></td><td class="px-6 py-4">Love percentage (0-100).</td><td class="px-6 py-4 font-mono text-slate-500">-</td></tr>
+                                    <tr class="hover:bg-dark-800/50 transition"><td class="px-6 py-4 font-mono text-brand-purple">background</td><td class="px-6 py-4 text-xs">string</td><td class="px-6 py-4 text-center text-slate-600"><i class="fa-solid fa-times"></i></td><td class="px-6 py-4">Background image URL.</td><td class="px-6 py-4 font-mono text-slate-500">Default Gradient</td></tr>
+                                    <tr class="hover:bg-dark-800/50 transition"><td class="px-6 py-4 font-mono text-brand-purple">font</td><td class="px-6 py-4 text-xs">string</td><td class="px-6 py-4 text-center text-slate-600"><i class="fa-solid fa-times"></i></td><td class="px-6 py-4">Custom font family name.</td><td class="px-6 py-4 font-mono text-slate-500">Plus Jakarta Sans</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="guide" class="scroll-mt-24 bg-dark-800 rounded-xl p-8 border border-dark-700">
+                    <h2 class="text-xl font-bold text-white mb-4"><i class="fa-solid fa-shield-halved"></i> Guide & Tips</h2>
+                    <ul class="space-y-4 text-slate-400 text-sm">
+                        <li class="flex gap-3 group transition cursor-pointer">
+                            <i class="fa-solid fa-check text-brand-pink mt-1 group-hover:text-brand-pink transition"></i>
+                            <div class="group-hover:text-white transition"><strong class="text-slate-200">Images:</strong> Use high-resolution square images for avatars to prevent stretching or warping.</div>
+                        </li>
+                        <li class="flex gap-3 group transition cursor-pointer">
+                            <i class="fa-solid fa-check text-brand-purple mt-1 group-hover:text-brand-purple transition"></i>
+                            <div class="group-hover:text-white transition"><strong class="text-slate-200">Gradients:</strong> For properties accepting `string[]`, providing 2-3 hex codes creates a smooth professional linear transition.</div>
+                        </li>
+                        <li class="flex gap-3 group transition cursor-pointer">
+                            <i class="fa-solid fa-check text-brand-blue mt-1 group-hover:text-brand-blue transition"></i>
+                            <div class="group-hover:text-white transition"><strong class="text-slate-200">Async Handling:</strong> All card generation methods are asynchronous. Always use `await` when calling `.build()` or `.generate()`.</div>
+                        </li>
+                    </ul>
+                </section>
+                
+                <div class="mt-20 pt-10 border-t border-dark-700 text-center text-sm text-slate-500">
+                    <p class="mb-2">ISC © <a href="https://github.com/ZarScape" class="text-brand-purple hover:underline hover:text-brand-pink transition">Muhammad Abuzar (ZarScape)</a></p>
+                    <p>Designed with ZarCanvas Documentation</p>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
+    <script>
+        // Mobile Toggle
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('mobile-overlay');
+
+        function toggleMobileMenu() {
+            sidebar.classList.toggle('-translate-x-full');
+            if(sidebar.classList.contains('-translate-x-full')) {
+                overlay.classList.add('hidden');
+            } else {
+                overlay.classList.remove('hidden');
+            }
+        }
+        
+        // Link click closes menu on mobile
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                if(window.innerWidth < 768) toggleMobileMenu();
+            });
+        });
+
+        // Search Logic
+        const searchModal = document.getElementById('search-modal');
+        const searchInput = document.getElementById('search-input');
+        const searchResults = document.getElementById('search-results');
+        const allSections = Array.from(document.querySelectorAll('section[id], article[id], div[id^="api-"]'));
+        const headings = allSections.map(section => {
+            const heading = section.querySelector('h1, h2, h3');
+            return {
+                id: section.id,
+                text: heading ? heading.innerText : section.id.replace(/-/g, ' '),
+                level: heading ? heading.tagName : 'H3' // Default level
+            };
+        }).filter(h => h.text);
+
+        function openSearch() {
+            searchModal.classList.remove('hidden');
+            setTimeout(() => {
+                searchModal.classList.remove('opacity-0');
+                searchModal.querySelector('div').classList.remove('scale-95');
+            }, 10);
+            searchInput.focus();
+        }
+
+        function closeSearch() {
+            searchModal.classList.add('opacity-0');
+            searchModal.querySelector('div').classList.add('scale-95');
+            setTimeout(() => {
+                searchModal.classList.add('hidden');
+                searchInput.value = '';
+                renderResults([]);
+            }, 200);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); openSearch(); }
+            if (e.key === 'Escape') closeSearch();
+        });
+        
+        searchModal.addEventListener('click', (e) => {
+            if (e.target === searchModal) closeSearch();
+        });
+
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            if(!query) { renderResults([]); return; }
+            renderResults(headings.filter(h => h.text.toLowerCase().includes(query)));
+        });
+
+        function renderResults(results) {
+            if (results.length === 0 && searchInput.value) {
+                searchResults.innerHTML = '<div class="text-center py-4 text-slate-500">No results found.</div>';
+                return;
+            }
+            if(results.length === 0) {
+                 searchResults.innerHTML = '<div class="text-center py-8 text-slate-500 text-sm">Type to search...</div>';
+                 return;
+            }
+            searchResults.innerHTML = results.map(item => `
+                <a href="#${item.id}" onclick="closeSearch()" class="block p-3 hover:bg-dark-900 rounded-lg group transition border border-transparent hover:border-brand-purple/50 mb-1">
+                    <div class="text-xs text-brand-blue font-semibold mb-0.5">${item.level}</div>
+                    <div class="text-slate-300 font-medium group-hover:text-white">${item.text}</div>
+                </a>
+            `).join('');
+        }
+
+        // ScrollSpy
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    document.querySelectorAll('.nav-link').forEach(link => {
+                        link.classList.remove('text-white', 'bg-dark-800', 'font-semibold', 'text-gradient');
+                        link.classList.add('text-slate-400');
+                        
+                        if (link.getAttribute('href') === `#${entry.target.id}` || 
+                            link.getAttribute('href') === `#${entry.target.closest('section')?.id}`) {
+                            link.classList.add('text-white', 'bg-dark-800', 'font-semibold');
+                            link.classList.remove('text-slate-400');
+                        }
+                    });
+                }
+            });
+        }, { rootMargin: '-15% 0px -70% 0px' });
+
+        document.querySelectorAll('section[id], article[id]').forEach(section => observer.observe(section));
+
+        // Copy Button
+        document.querySelectorAll('.code-wrapper').forEach(wrapper => {
+            const btn = document.createElement('button');
+            btn.className = 'copy-btn';
+            btn.innerHTML = '<i class="fa-regular fa-copy"></i> Copy';
+            btn.addEventListener('click', () => {
+                const code = wrapper.querySelector('code').innerText;
+                navigator.clipboard.writeText(code).then(() => {
+                    btn.innerHTML = '<i class="fa-solid fa-check text-green-400"></i> Copied!';
+                    setTimeout(() => btn.innerHTML = '<i class="fa-regular fa-copy"></i> Copy', 2000);
+                });
+            });
+            wrapper.appendChild(btn);
+        });
+    </script>
+</body>
+</html>

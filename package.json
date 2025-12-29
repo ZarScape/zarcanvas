@@ -1,0 +1,76 @@
+{
+  "name": "zarcanvas",
+  "version": "1.0.0",
+  "description": "ZarCanvas is a native canvas library for crafting stylish, modern card designs.",
+  "author": "ZarScape",
+  "license": "ISC",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "fonts",
+    "assets"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "build:watch": "tsup --watch",
+    "clean": "rimraf dist",
+    "prepare": "npm run build",
+    "test": "npm run build && npm run test:instagram && npm run test:ship && npm run test:x && npm run test:music && npm run test:profile",
+    "test:instagram": "node test/_run_instagram_test.js",
+    "test:ship": "node test/_run_ship_test.js",
+    "test:x": "node test/_run_x_test.js",
+    "test:music": "node test/_run_music_test.js",
+    "test:profile": "node test/_run_profile_test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ZarScape/zarcanvas.git"
+  },
+  "keywords": [
+    "canvas",
+    "images",
+    "instagram",
+    "twitter",
+    "x",
+    "cards",
+    "graphics",
+    "zarcanvas",
+    "zarscape"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "tsup": {
+    "entry": [
+      "src/index.ts"
+    ],
+    "format": [
+      "cjs",
+      "esm"
+    ],
+    "dts": true,
+    "outDir": "dist",
+    "clean": true,
+    "splitting": false,
+    "sourcemap": true
+  },
+  "dependencies": {
+    "@napi-rs/canvas": "^0.1.84"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "rimraf": "^6.1.2",
+    "tsup": "^8.5.1",
+    "typescript": "^5.3.3"
+  }
+}
