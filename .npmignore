@@ -4,7 +4,7 @@ test/
 tests/
 __tests__/
 examples/
-docs.html
+index.html
 
 # Editor directories
 .vscode/
