@@ -129,7 +129,6 @@ Native X/Twitter post simulation using Chirp fonts.
 
 ![tweet-card](https://raw.githubusercontent.com/ZarScape/ZarScape/refs/heads/main/images/zarcanvas/tweet-card.png)
 
-
 ```javascript
 import { TweetCard } from 'zarcanvas';
 
@@ -235,7 +234,7 @@ const buffer = await card.build();
 - **Images**: Use high-resolution square images for avatars to prevent stretching or warping.
 - **Gradients**: For properties accepting `string[]`, providing 2-3 hex codes creates a smooth professional linear transition.
 - **Async Handling**: All card generation methods are asynchronous. Always use `await` when calling `.build()` or `.generate()`..
-
+  
 ---
 
 ## 📜 License
